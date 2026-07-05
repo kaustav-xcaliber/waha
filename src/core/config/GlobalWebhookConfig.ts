@@ -17,6 +17,7 @@ enum Env {
   WHATSAPP_HOOK_RETRIES_ATTEMPTS = 'WHATSAPP_HOOK_RETRIES_ATTEMPTS',
   WHATSAPP_HOOK_HMAC_KEY = 'WHATSAPP_HOOK_HMAC_KEY',
   WHATSAPP_HOOK_CUSTOM_HEADERS = 'WHATSAPP_HOOK_CUSTOM_HEADERS',
+  WHATSAPP_HOOK_INCLUDE_CHATS = 'WHATSAPP_HOOK_INCLUDE_CHATS',
 }
 
 export class GlobalWebhookConfigConfig {
@@ -64,6 +65,19 @@ export class GlobalWebhookConfigConfig {
       delaySeconds: delaySeconds,
       attempts: attempts,
     };
+  }
+
+  private getIncludeChats(): string[] {
+    const value = this.configService.get(Env.WHATSAPP_HOOK_INCLUDE_CHATS, '');
+    if (!value) {
+      return [];
+    }
+    return value
+      .split(',')
+      .map((chat: string) => {
+        return chat.trim();
+      })
+      .filter(Boolean);
   }
 
   private getCustomHeaders(): CustomHeader[] {
@@ -114,6 +128,7 @@ export class GlobalWebhookConfigConfig {
       'retries.delaySeconds': Env.WHATSAPP_HOOK_RETRIES_DELAY_SECONDS,
       'retries.attempts': Env.WHATSAPP_HOOK_RETRIES_ATTEMPTS,
       'hmac.key': Env.WHATSAPP_HOOK_HMAC_KEY,
+      includeChats: Env.WHATSAPP_HOOK_INCLUDE_CHATS,
     };
     return keys[key] || null;
   }
@@ -159,6 +174,7 @@ export class GlobalWebhookConfigConfig {
       hmac: this.getHmac(),
       retries: this.getRetries(),
       customHeaders: this.getCustomHeaders(),
+      includeChats: this.getIncludeChats(),
     };
     return plainToInstance(WebhookConfig, data, {
       enableImplicitConversion: true,

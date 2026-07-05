@@ -1,6 +1,7 @@
 import { populateSessionInfo } from '@waha/core/abc/manager.abc';
 import { WhatsappSession } from '@waha/core/abc/session.abc';
 import { WebhookSender } from '@waha/core/integrations/webhooks/WebhookSender';
+import { WebhookChatIncludeFilter, extractWebhookChatId } from '@waha/core/utils/webhook-chat';
 import { WAHAEvents, WAHAEventsWild } from '@waha/structures/enums.dto';
 import { WebhookConfig } from '@waha/structures/webhooks.config.dto';
 import { EventWildUnmask } from '@waha/utils/events';
@@ -41,10 +42,22 @@ export class WebhookConductor {
     this.logger.info(`Configuring webhooks for ${url}...`);
     const events = this.getSuitableEvents(webhook.events);
     const sender = this.buildSender(webhook);
+    const chatFilter = new WebhookChatIncludeFilter(webhook.includeChats);
     for (const event of events) {
       const obs$ = session.getEventObservable(event);
       obs$.subscribe((payload) => {
         setImmediate(() => {
+          if (!chatFilter.shouldDeliver(event, session.engine, payload)) {
+            this.logger.debug(
+              {
+                event: event,
+                chatId: extractWebhookChatId(event, session.engine, payload),
+                url: url,
+              },
+              'Webhook event skipped by includeChats filter',
+            );
+            return;
+          }
           const data = populateSessionInfo(event, session)(payload);
           sender.send(data);
         });

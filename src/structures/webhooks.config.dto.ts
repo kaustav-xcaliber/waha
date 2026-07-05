@@ -115,4 +115,15 @@ export class WebhookConfig {
   @IsArray()
   @IsOptional()
   customHeaders?: CustomHeader[];
+
+  @ApiProperty({
+    example: ['11111111111@c.us', '120363012345678901@g.us'],
+    description:
+      'Optional allowlist of chat IDs or phone numbers. When set, only events for these chats are delivered. Leave empty to receive all chats.',
+    required: false,
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  includeChats?: string[];
 }

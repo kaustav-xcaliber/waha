@@ -30,6 +30,7 @@ export const SessionExamples = {
                 value: '123',
               },
             ],
+            includeChats: ['11111111111@c.us'],
           },
         ],
       },
@@ -78,6 +79,7 @@ export const SessionExamples = {
             hmac: {
               key: 'super-secret',
             },
+            includeChats: ['11111111111@c.us', '120363012345678901@g.us'],
           },
         ],
       },
